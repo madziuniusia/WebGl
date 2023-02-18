@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cw07</title>
+    <script src="/js/three145.js"></script>
+    <link rel="stylesheet" href="/style/css.css">
+</head>
+
+<body>
+    <h1>07:button - ustawianie kamery w roznych miejscach ukladu wspolrzednych</h1>
+    <div class="container">
+        <div>
+            <button id="bt1">Ustaw Kamere</button>
+        </div>
+        <p id="WHAT"></p>
+    </div>
+    <div id="root"></div>
+
+
+    <script>
+        window.addEventListener("load", function () {
+
+            // scena 3D
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(
+                45, // kąt patrzenia kamery (FOV - field of view)
+                window.innerWidth / window.innerHeight, // proporcje widoku, powinny odpowiadać proporcjom ekranu przeglądarki użytkownika
+                0.1, // minimalna renderowana odległość
+                10000 // maksymalna renderowana odległość od kamery
+            );
+
+
+            const renderer = new THREE.WebGLRenderer();
+
+            // kolor tła sceny - uwaga na prefix 0x a nie #
+
+            renderer.setClearColor(0xffffff);
+
+            // ustal rozmiary renderowanego okna w px (szer, wys)
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // dodanie renderera do diva, który istnieje na scenie
+
+            document.getElementById("root").appendChild(renderer.domElement);
+
+            camera.position.set(100, 100, 100)
+            camera.lookAt(scene.position);
+
+            //osie
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+
+            const geometry = new THREE.BoxGeometry(50, 50, 50);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x8888ff,
+                side: THREE.DoubleSide,
+                wireframe: false,
+                transparent: true,
+                opacity: 0.5
+
+            });
+            let cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+            let x = 101
+            let y = 101
+            let z = 101
+            let PCam = "ABC";
+            let dx = 1;
+
+            bt1.addEventListener('click', function () {
+                if (PCam === false) {
+                    PCam = true
+                    document.getElementById('WHAT').innerHTML = "USTAWIASZ Y"
+                } else if (PCam === true) {
+                    PCam = "XDD";
+                    document.getElementById('WHAT').innerHTML = "USTAWIASZ Z"
+                } else if (PCam === "XDD") {
+                    PCam = "";
+                    document.getElementById('WHAT').innerHTML = "STOP"
+                } else {
+                    PCam = false;
+                    document.getElementById('WHAT').innerHTML = "USTAWIASZ X"
+                }
+            })
+
+            function render() {
+                if (PCam === false) {
+                    if (x >= 200 || x <= -200) {
+                        dx = -dx;
+                    }
+                    x += dx;
+                } else if (PCam === true) {
+                    if (y >= 200 || y <= -200) {
+                        dx = -dx;
+                    }
+                    y += dx;
+                } else if (PCam === "XDD") {
+                    if (z >= 200 || z <= -200) {
+                        dx = -dx;
+                    }
+                    z += dx;
+                }
+                camera.position.set(x, y, z)
+
+                requestAnimationFrame(render);
+                camera.lookAt(scene.position)
+                /* camera.fov = 10;
+                camera.updateProjectionMatrix(); */
+                renderer.render(scene, camera);
+            }
+            render();
+        })
+    </script>
+
+</body>
+
+</html>

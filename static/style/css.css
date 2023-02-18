@@ -1,0 +1,46 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    padding: 50px;
+}
+.container {
+    margin: 50px;
+    font-size: xx-large;
+}
+.lessons {
+    margin: 50px;
+}
+h1 {
+    text-align: center;
+}
+
+#data {
+    border: 2px solid red;
+    border-radius: 5px;
+    width: 200px;
+    height: 100px;
+}
+
+button{
+    width: 100px;
+    height: 50px;
+}
+
+.in {
+    width: 100px;
+    height: 50px;
+}
+
+.center {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cw08</title>
+    <script src="/js/three145.js"></script>
+    <link rel="stylesheet" href="/style/css.css">
+</head>
+
+<body>
+    <h1>07:raycaster, mysz, klawiatura</h1>
+
+    <div class="container">
+    </div>
+
+    <div id="root"></div>
+
+    <script>
+        const raycaster = new THREE.Raycaster(); // obiekt Raycastera symulujący "rzucanie" promieni
+        const mouseVector = new THREE.Vector2() // ten wektor czyli pozycja w przestrzeni 2D na ekranie(x,y) wykorzystany będzie do określenie pozycji myszy na ekranie, a potem przeliczenia na pozycje 3D
+        let click = false;
+        let ObjNow = false;
+        let ArrObj = [];
+        const tab = [];
+        let angle = 1;
+
+        for (let i = -2; i < 2; i++) {
+            for (let j = -2; j < 2; j++) {
+                if (i == 1 || i == (-2) || j == 1 || j == (-2)) {
+                    tab.push([10 * i + 5, 0, 10 * j + 5])
+                }
+                if (i == (-2) && j != 1 || j == (-2) && i != 1) {
+                    tab.push([10 * i + 5, 10, 10 * j + 5])
+                }
+                if (i == (-2) && j != 1 && j != 0 || j == (-2) && i != 1 && i != 0) {
+                    tab.push([10 * i + 5, 20, 10 * j + 5])
+                }
+                if (i == -2 && j == -2) {
+                    tab.push([10 * i + 5, 30, 10 * j + 5])
+                }
+            }
+        }
+
+        window.addEventListener("load", function () {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(
+                20,    // kąt patrzenia kamery (FOV - field of view)
+                window.innerWidth / window.innerHeight,    // proporcje widoku, powinny odpowiadać proporcjom ekranu przeglądarki użytkownika
+                0.1,    // minimalna renderowana odległość
+                10000    // maksymalna renderowana odległość od kamery
+            );
+
+            const renderer = new THREE.WebGLRenderer();
+
+            // kolor tła sceny - uwaga na prefix 0x a nie #
+            renderer.setClearColor(0xffffff);
+
+            // ustal rozmiary renderowanego okna w px (szer, wys)
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            //osie
+            const axes = new THREE.AxesHelper(-1000);
+            const axes1 = new THREE.AxesHelper(1000);
+            scene.add(axes, axes1)
+
+            //klocki
+            const geometry = new THREE.BoxGeometry(10, 10, 10);
+            let materials = [];
+
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load('/mats/bokgrass.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load('/mats/bokgrass.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load('/mats/grass.png') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load('/mats/dirt.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load('/mats/bokgrass.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load('/mats/bokgrass.jpg') }));
+
+            for (let i = 0; i < tab.length; i++) {
+                const cube = new THREE.Mesh(geometry, materials);
+                cube.position.set(...tab[i]);
+                scene.add(cube);
+                ArrObj.push(cube);
+            }
+            cube = null;
+
+            window.addEventListener("mousedown", (e) => {
+                mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouseVector, camera);
+                const intersects = raycaster.intersectObjects(scene.children);
+                if (intersects.length > 0) {
+                    //console.log(intersects[0].object);
+                    ObjNow = true;
+                    cube = intersects[0].object;
+                }
+                console.log(intersects.length)
+            });
+
+            // dodanie renderera do diva, który istnieje na scenie
+            document.getElementById("root").appendChild(renderer.domElement);
+
+            camera.position.set(200, 200, 200)
+            camera.lookAt(scene.position);
+
+            window.addEventListener("keydown", (e) => {
+                if (e.keyCode == 37) { //lewo
+                    if (ObjNow) {
+                        cube.position.x += 10;
+                    }
+                } else if (e.keyCode == 39) { //prawo
+                    if (ObjNow) {
+                        cube.position.x -= 10;
+                    }
+                } else if (e.keyCode == 38) { //dół
+                    if (ObjNow) {
+                        cube.position.y += 10;
+                    }
+                } else if (e.keyCode == 40) { //gora
+                    if (ObjNow) {
+                        cube.position.y -= 10;
+                    }
+                } else if (e.keyCode == 27) {
+                    ObjNow = false;
+                }
+            })
+
+            function render() {
+                window.addEventListener("keydown", (e) => {
+                    if (e.keyCode == 37) { //lewo
+                        if (ObjNow === false) {
+                            camera.position.z = 200 * Math.cos(angle);
+                            camera.position.x = 200 * Math.sin(angle);
+                            angle += 0.0001;
+                            camera.lookAt(scene.position);
+                        }
+                    } else if (e.keyCode == 39) { //prawo
+                        if (ObjNow === false) {
+                            camera.position.z = 200 * Math.cos(angle);
+                            camera.position.x = 200 * Math.sin(angle);
+                            angle -= 0.0001;
+                            camera.lookAt(scene.position);
+                        }
+                    } else if (e.keyCode == 38) { //dół
+                        if (ObjNow === false) {
+                            camera.position.y += 0.05;
+                            camera.lookAt(scene.position);
+                        }
+                    } else if (e.keyCode == 40) { //gora
+                        if (ObjNow === false) {
+                            camera.position.y -= 0.05;
+                            camera.lookAt(scene.position);
+                        }
+                    } else if (e.keyCode == 27) {
+                        ObjNow = false;
+                    }
+                })
+
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+            }
+            render();
+
+        })
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cw1</title>
+    <link rel="stylesheet" href="/style/css.css">
+</head>
+
+<body>
+    <div class="root" id="root">
+        <div class="suwak">
+            <input id="suwak" type="range" value="10" max="150" min="0">
+            <p id="value"></p>
+        </div>
+        <button id="kat">Kąt padania światła</button>
+        <div class="json" id="json"></div>
+    </div>
+    <script src="/js/three145.js"></script>
+    <script>
+        let suwak = document.getElementById('suwak')
+
+        let cubeSize = 100
+
+        window.addEventListener("load", function () {
+            // scena 3D
+
+            const scene = new THREE.Scene();
+
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+            //kamera perspektywiczna - przeczytaj dokładnie objaśnienia w komentarzach
+
+            const camera = new THREE.PerspectiveCamera(
+                45,    // kąt patrzenia kamery (FOV - field of view)
+                window.innerWidth / window.innerHeight,    // proporcje widoku, powinny odpowiadać proporcjom naszego ekranu przeglądarki
+                0.1,    // minimalna renderowana odległość
+                10000    // maksymalna renderowana odległość od kamery
+            );
+
+            // renderer wykorzystujący WebGL - działa stabilnie na wszystkich
+            // najnowszych przeglądarkach zarówno desktopowych jak mobilnych
+
+            const renderer = new THREE.WebGLRenderer();
+
+            // kolor tła sceny - uwaga na prefix 0x a nie #
+
+            renderer.setClearColor(0xffffff);
+
+            // ustal rozmiary renderowanego okna w px (szer, wys)
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // dodanie renderera do diva, który istnieje na scenie
+
+            document.getElementById("root").appendChild(renderer.domElement);
+
+            camera.position.set(100, 100, 100)
+            camera.lookAt(scene.position)
+
+            // kluczowy element - animacja
+            const geometry = new THREE.BoxGeometry(30, 30, 30);
+
+            const material = new THREE.MeshPhongMaterial({
+                specular: 0xffffff,
+                shininess: 50,
+                side: THREE.DoubleSide,
+                map: new THREE.TextureLoader().load("https://i.imgur.com/iX82LAy.png"),
+            })
+
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            const geometry1 = new THREE.BoxGeometry(20, 20, 20);
+            const material1 = new THREE.MeshPhongMaterial({
+                color: 0x00ff00,
+                specular: 0x00ffff,
+                shininess: 50,
+                side: THREE.DoubleSide,
+                map: new THREE.TextureLoader().load(
+                    "https://i.imgur.com/3UN2ecu.jpg"
+                ),
+            });
+
+            for (let i = -100; i <= 100; i = i + 20) {
+                for (let j = -100; j <= 100; j = j + 20) {
+                    const cube = new THREE.Mesh(geometry1, material1);
+                    cube.position.set(i, -40, j);
+                    scene.add(cube);
+                }
+            }
+
+            let light = new THREE.DirectionalLight(0xffff00, 1);
+            light.position.set(1, 1, 1);
+            document.getElementById('json').innerHTML = JSON.stringify(light.position, null, 5)
+            scene.add(light);
+            let pos = 0
+            document.getElementById('kat').addEventListener('click', () => {
+                switch (pos) {
+                    case 0:
+                        light.position.set(1, 0, 1)
+                        break;
+                    case 1:
+                        light.position.set(0, 1, 1)
+                        break;
+                    case 2:
+                        light.position.set(1, 1, 0)
+                        break;
+                    case 3:
+                        light.position.set(0, 0, 1)
+                        break;
+                    case 4:
+                        light.position.set(0, 1, 0)
+                        break;
+                    case 5:
+                        light.position.set(1, 0, 0)
+                        break;
+                    case 6:
+                        light.position.set(0, 0, 0)
+                        break;
+                    case 7:
+                        light.position.set(1, 1, 1)
+                        break;
+                }
+                pos++
+                if (pos === 8) pos = 0
+                document.getElementById('json').innerHTML = JSON.stringify(light.position, null, 5)
+            })
+            function render() {
+
+
+                //w tym miejscu ustalamy wszelkie zmiany w projekcie (obrót, skalę, położenie obiektów)
+                //np zmieniająca się wartość rotacji obiektu
+
+                //mesh.rotation.y += 0.01;
+
+                //wykonywanie funkcji bez końca, ok 60 fps jeśli pozwala na to wydajność maszyny
+
+                requestAnimationFrame(render);
+
+                // potwierdzenie w konsoli, że render się wykonuje
+
+                console.log("render leci")
+
+                //ciągłe renderowanie / wyświetlanie widoku sceny naszą kamerą
+
+                renderer.render(scene, camera);
+                cube.rotation.y += 0.01
+                light.intensity = document.getElementById('suwak').value / 10
+                camera.updateProjectionMatrix()
+            }
+
+            // na koniec jednokrotne wykonanie powyższej funkcji
+
+            render();
+        })
+    </script>
+</body>
+
+</html>

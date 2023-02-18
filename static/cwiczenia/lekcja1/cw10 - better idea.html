@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cw10</title>
+    <script src="/js/three145.js"></script>
+    <link rel="stylesheet" href="/style/css.css">
+</head>
+
+<body>
+    <h1>10: utorzenie i pozycjonowanie wielu figur 2 - pętla for</h1>
+    <div>
+
+        <div class="container">
+            <div>field of view <input type="range" id="field" min="10" max="100" value="450"></div>
+            <div>y pos <input type="range" id="Y" min="0" max="500" value="100"></div>
+            <div>count <input type="range" id="count" min="2" max="5" value="2" step="0.5"></div>
+        </div>
+
+    </div>
+    <div id="root"></div>
+
+    <script>
+        window.addEventListener("load", function () {
+            // scena 3D
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(
+                45, // kąt patrzenia kamery (FOV - field of view)
+                window.innerWidth / window.innerHeight, // proporcje widoku, powinny odpowiadać proporcjom ekranu przeglądarki użytkownika
+                0.1, // minimalna renderowana odległość
+                10000 // maksymalna renderowana odległość od kamery
+            );
+
+
+            const renderer = new THREE.WebGLRenderer();
+
+            // kolor tła sceny - uwaga na prefix 0x a nie #
+
+            renderer.setClearColor(0xffffff);
+
+            // ustal rozmiary renderowanego okna w px (szer, wys)
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // dodanie renderera do diva, który istnieje na scenie
+
+            document.getElementById("root").appendChild(renderer.domElement);
+
+            camera.position.set(200, 150, 200)
+            camera.lookAt(scene.position);
+
+            const geometry = new THREE.BoxGeometry(50, 50, 50);
+            const material = new THREE.MeshNormalMaterial({
+                side: THREE.DoubleSide,
+                wireframe: false,
+                transparent: true,
+                opacity: 1
+            });
+
+            //osie
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+
+            let tab = [];
+            let x;
+
+            function render() {
+                camera.fov = document.getElementById('field').value;
+                camera.updateProjectionMatrix();
+
+                x = document.getElementById('count').value;
+                tab.forEach(element => {
+                    scene.remove(element);
+                });
+
+                for (let i = -x; i <= x; i++) {
+                    for (let j = -x; j <= x; j++) {
+                        if (i == x || j == x || j == -x || i == -x) {
+                            let cube = new THREE.Mesh(geometry, material);
+                            cube.position.set(i * 50, 0, j * 50);
+                            scene.add(cube);
+                            tab.push(cube);
+                            if (i == x) {
+                                cube.position.y = j * -50
+                            } else if (i == -x) {
+                                cube.position.y = j * 50
+                            } else if (j == -x) {
+                                cube.position.y = i * 50
+                            } else if (j == x) {
+                                cube.position.y = i * -50
+                            }
+                        }
+                    }
+                }
+
+                requestAnimationFrame(render);
+
+                camera.position.y = document.getElementById('Y').value;
+                camera.lookAt(scene.position)
+
+                renderer.render(scene, camera);
+            }
+            render();
+        })
+    </script>
+
+</body>
+
+</html>

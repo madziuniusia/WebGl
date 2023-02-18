@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cw05</title>
+    <script src="/js/three145.js"></script>
+    <link rel="stylesheet" href="/style/css.css">
+</head>
+
+<body>
+    <h1>05: inputy i button - utworz prostopadloscian o wymiarach pobranych z inputow</h1>
+    <div class="container">
+        <div>
+            <input class="in" id="width" type="number">
+            <input class="in" id="height" type="number">
+            <input class="in" id="depth" type="number">
+            <button id="bt1">Utworz</button>
+        </div>
+        <!-- <div id="data">text</div> -->
+    </div>
+    <div id="root"></div>
+
+
+    <script>
+
+        window.addEventListener("load", function () {
+
+            // scena 3D
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(
+                45,    // kąt patrzenia kamery (FOV - field of view)
+                window.innerWidth / window.innerHeight,    // proporcje widoku, powinny odpowiadać proporcjom ekranu przeglądarki użytkownika
+                0.1,    // minimalna renderowana odległość
+                10000    // maksymalna renderowana odległość od kamery
+            );
+
+
+            const renderer = new THREE.WebGLRenderer();
+
+            // kolor tła sceny - uwaga na prefix 0x a nie #
+
+            renderer.setClearColor(0xffffff);
+
+            // ustal rozmiary renderowanego okna w px (szer, wys)
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // dodanie renderera do diva, który istnieje na scenie
+
+            document.getElementById("root").appendChild(renderer.domElement);
+
+            camera.position.set(100, 100, 100)
+            camera.lookAt(scene.position);
+
+            //osie
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+
+            let cube;
+            bt1.addEventListener('click', function () {
+                scene.remove(cube);
+                let width = document.getElementById('width').value;
+                let height = document.getElementById('height').value;
+                let depth = document.getElementById('depth').value;
+
+                const geometry = new THREE.BoxGeometry(width, height, depth);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x8888ff,
+                    side: THREE.DoubleSide,
+                    wireframe: false,
+                    transparent: true,
+                    opacity: 0.5
+
+                });
+                cube = new THREE.Mesh(geometry, material);
+                scene.add(cube);
+            })
+
+
+            function render() {
+                requestAnimationFrame(render);
+                /* camera.fov = 10;
+                camera.updateProjectionMatrix(); */
+                renderer.render(scene, camera);
+            }
+            render();
+        })
+    </script>
+
+</body>
+
+</html>
